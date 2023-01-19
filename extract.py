@@ -86,6 +86,8 @@ class Extract():
         def write(f, s): (root / f).write_text(s)
 
         write('index.html', str(self))
+        for file, data in self.payloads.items():
+            write(file, data)
 
         return root
 

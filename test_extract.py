@@ -3,10 +3,10 @@ from pathlib import Path
 from pytest import fixture
 from tempfile import TemporaryDirectory
 
-TEST_FILE='sample.mht'
+TEST_MHT='sample.mht'
 TEST_URI='cid:css-8e135dc7-1298-4278-b82b-9168ec675a37@mhtml.blink'
 
-def test_file():
+def filename():
 	file_path = Path(TEST_URI.split(':')[1])
 	assert MAGIC_EXT in str(file_path)
 	file_name = extract_filename(file_path, ['text', 'css'])
@@ -14,7 +14,7 @@ def test_file():
 
 @fixture
 def ex():
-	ex = Extract(TEST_FILE)
+	ex = Extract(TEST_MHT)
 	return ex
 
 @fixture
@@ -33,9 +33,10 @@ def test_ex_save(ex, tmp):
 	assert root
 	assert root.exists()
 	assert (root / 'index.html').exists()
+	assert (root / filename()).exists()
 
 def test_filename(ex):
-	file_name = test_file()
+	file_name = filename()
 	local_file = f'./{file_name}'
 	assert '9168ec675a37.css' in local_file
 	assert TEST_URI not in str(ex)
