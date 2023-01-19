@@ -81,7 +81,13 @@ class Extract():
         return attrs
 
     def save(self, dest='.'):
-        return dest
+        root = Path(dest) / self.folder
+        root.mkdir(exist_ok=True)
+        def write(f, s): (root / f).write_text(s)
+
+        write('index.html', str(self))
+
+        return root
 
     def get(self, name=None, **kwargs):
         return self.soup.find(name, **kwargs) if self.soup else None
@@ -101,6 +107,7 @@ class Extract():
 
         if 'html' in ctype:
             assert not self.html
+            self.folder = Path(uri).name
             self.raw_html = raw_payload
             self.html = payload
             self.soup = BeautifulSoup(payload, features="html.parser")
