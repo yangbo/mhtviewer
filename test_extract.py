@@ -1,6 +1,7 @@
 from extract import * 
 from pathlib import Path
 from pytest import fixture
+from tempfile import TemporaryDirectory
 
 TEST_FILE='sample.mht'
 TEST_URI='cid:css-8e135dc7-1298-4278-b82b-9168ec675a37@mhtml.blink'
@@ -10,10 +11,18 @@ def ex():
 	ex = Extract(TEST_FILE)
 	return ex
 
+@fixture
+def tmp():
+    with TemporaryDirectory() as tmpdirname:
+        yield tmpdirname
+
 def test_ex_html(ex):
 	assert ex
 	assert ex.html
 	assert 'User F' in str(ex)
+
+def test_ex_save(ex, tmp):
+	assert ex.save(tmp)
 
 def test_filename(ex):
 	file_path = Path(TEST_URI.split(':')[1])

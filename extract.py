@@ -80,6 +80,9 @@ class Extract():
         self.replace_filename(uri, file_name)
         return attrs
 
+    def save(self, dest='.'):
+        return dest
+
     def get(self, name=None, **kwargs):
         return self.soup.find(name, **kwargs) if self.soup else None
 
@@ -88,7 +91,6 @@ class Extract():
 
     def update_link(self, uri, file_name):
         pass
-
 
     def parse_part(self, part):
         ctype = part.get('Content-Type').split('/')
