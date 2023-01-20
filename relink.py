@@ -32,9 +32,9 @@ def relink(ex, reviewer):
     toc = mktg('div')
     toc['id'] = RID_TOC
     toc.string = f"List of {RID}s"
-    sibling = ex.get(**{'class':"caUSsX"})
+    sibling = ex.get(class_=RID_PARENT)
     assert sibling
-    #sibling.insert_before(tadd(toc, links))
+    sibling.insert_before(tadd(toc, links))
     return ex
 
 def main():

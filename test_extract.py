@@ -6,7 +6,6 @@ from tempfile import TemporaryDirectory
 TEST_MHT='sample.mhtml'
 TEST_URI='cid:css-e7ca07c8-72d8-4000-b7d9-618b43ee95de@mhtml.blink'
 TEST_EXT='618b43ee95de.css'
-ANCHOR='jss6'
 
 def filename():
 	file_path = Path(TEST_URI.split(':')[1])
@@ -27,7 +26,7 @@ def tmp():
 def test_ex_html(ex):
 	assert ex
 	assert ex.html
-	assert ANCHOR in str(ex)
+	assert '_code' in str(ex)
 
 def test_ex_save(ex, tmp):
 	assert ex.folder =='reportgen'
