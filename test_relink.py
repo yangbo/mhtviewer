@@ -5,6 +5,7 @@ from pathlib import Path
 from pytest import fixture
 
 TEST_MHT='sample.mht'
+REVIEWER="User F"
 
 @fixture
 def soup():
@@ -16,7 +17,9 @@ def test_rel(soup):
 	assert soup
 
 def test_toc(soup):
-	toc = soup.body.div
+	print(RID_TOC)
+	toc = soup.find(id=RID_TOC)
+	print(soup.prettify())
 	assert toc
 	assert 'List' in str(toc)
 	assert RID in toc['id']
@@ -27,5 +30,10 @@ def test_toc(soup):
 	assert anchor
 	assert RID in anchor['href']
 
-
+def test_class(soup):
+    div = soup.find("div", {"data-test": "pagecontainer"})
+    assert div
+    _class = div['class']
+    assert _class
+    assert "umKTn" in _class
 
