@@ -31,7 +31,7 @@ def untest_toc(soup):
 	assert RID in anchor['href']
 
 def test_div(soup):
-    cont = soup.find(**{'data-test':"review__header"})
+    cont = soup.find(_class="caUSsX")
     assert cont
 
 def untest_ex_get(ex):
