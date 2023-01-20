@@ -15,10 +15,10 @@ def tadd(p,t):
 def relink(ex, review_tag):
     def mktg(name): return ex.soup.new_tag(name)
 
-    links = ex.soup.new_tag('ol')
+    links = ex.soup.new_tag('ul')
     rtags = ex.get_all(review_tag)
     for i, tag in enumerate(rtags):
-        rid = f'{RID}_{(i+1):03}'
+        rid = f'{RID}_{(i+2):03}'
         tag['id'] = rid
         tag.string = f'{rid}. {tag.string}'
 
@@ -34,7 +34,6 @@ def relink(ex, review_tag):
     toc.string = f"List of {RID}s"
     sibling = ex.get(class_=RID_PARENT)
     assert sibling
-    print(links)
     sibling.insert_before(tadd(toc, links))
     # NOTE: searching tags after the insertion point FAILS
     return ex

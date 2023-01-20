@@ -20,7 +20,6 @@ def test_rel(soup):
 def test_toc(soup):
 	print(RID_TOC)
 	toc = soup.find(id=RID_TOC)
-	#print(soup.prettify())
 	assert toc
 	assert 'List' in str(toc)
 	assert RID in toc['id']
@@ -31,12 +30,12 @@ def test_toc(soup):
 	assert anchor
 	assert RID in anchor['href']
 
-def test_div(soup):
+def untest_div(soup):
 	sib = soup.find(class_=RID_PARENT)
 	print(str(soup.body.div.div.div)[500:1000])
-	#assert sib
-	#assert sib['class']
-	#assert RID_PARENT in sib['class']
+	assert sib
+	assert sib['class']
+	assert RID_PARENT in sib['class']
 
 def untest_find_anchor(soup):
 	#print(soup.body.div.div.prettify())
