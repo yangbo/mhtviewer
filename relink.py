@@ -12,15 +12,15 @@ def tadd(p,t):
     p.contents.append(t)
     return p
 
-def relink(ex, reviewer):
+def relink(ex, review_tag):
     def mktg(name): return ex.soup.new_tag(name)
 
     links = ex.soup.new_tag('ol')
-    rtags = ex.get_all('b', string=reviewer)
+    rtags = ex.get_all(review_tag)
     for i, tag in enumerate(rtags):
-        n = i+1
-        tag['id'] = f'{RID}_{n:03}'
-        tag.string = f'{RID} #{n:03}. {tag.string}'
+        rid = f'{RID}_{(i+1):03}'
+        tag['id'] = rid
+        tag.string = f'{rid}. {tag.string}'
 
         link = mktg('a')
         link['href'] = f'#{tag["id"]}'
@@ -34,19 +34,21 @@ def relink(ex, reviewer):
     toc.string = f"List of {RID}s"
     sibling = ex.get(class_=RID_PARENT)
     assert sibling
-    sibling.insert_after(tadd(toc, links))
+    print(links)
+    sibling.insert_before(tadd(toc, links))
+    # NOTE: searching tags after the insertion point FAILS
     return ex
 
 def main():
     args = sys.argv
     if len(args) != 3:
-        print("Usage: ./relink.py <mht file> <reviewer>")
+        print("Usage: ./relink.py <mht file> <review_tag>")
         return
     mht = sys.argv[1]
     reviewer = sys.argv[2]
-    print('Extract multi-part of "%s" ...' % mht)
+    print(f'Extract multi-part from "{mht}" ...')
     ex = Extract(mht)
-    print('Adding links for "%s" ...' % reviewer)
+    print('Adding links to "{reviewer}" ...')
     relink(ex, reviewer)
     ex.save()
 

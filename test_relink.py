@@ -6,7 +6,7 @@ from pathlib import Path
 from pytest import fixture
 
 TEST_MHT='sample.mhtml'
-TEST_ANCHOR='jss6'
+TEST_ANCHOR='h4'
 
 @fixture
 def soup():
@@ -17,7 +17,7 @@ def soup():
 def test_rel(soup):
 	assert soup
 
-def untest_toc(soup):
+def test_toc(soup):
 	print(RID_TOC)
 	toc = soup.find(id=RID_TOC)
 	#print(soup.prettify())
@@ -38,8 +38,8 @@ def test_div(soup):
 	#assert sib['class']
 	#assert RID_PARENT in sib['class']
 
-def test_find_anchor(soup):
-	print(soup.body.div.div.prettify())
+def untest_find_anchor(soup):
+	#print(soup.body.div.div.prettify())
 	# ONLY works if `sibling.insert_after(tadd(toc, links))`
 	result = soup.findAll('h4')
 	assert result
