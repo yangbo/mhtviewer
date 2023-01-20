@@ -4,7 +4,7 @@ from relink import *
 from pathlib import Path
 from pytest import fixture
 
-TEST_MHT='sample.mht'
+TEST_MHT='sample.mhtml'
 REVIEWER="User F"
 
 @fixture
