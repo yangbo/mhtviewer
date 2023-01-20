@@ -80,6 +80,17 @@ class Extract():
         self.replace_filename(uri, file_name)
         return attrs
 
+    def save(self, dest='.'):
+        root = Path(dest) / self.folder
+        root.mkdir(exist_ok=True)
+        def write(f, s): (root / f).write_text(s)
+
+        write('index.html', str(self))
+        for file, data in self.payloads.items():
+            write(file, data)
+
+        return root
+
     def get(self, name=None, **kwargs):
         return self.soup.find(name, **kwargs) if self.soup else None
 
@@ -88,7 +99,6 @@ class Extract():
 
     def update_link(self, uri, file_name):
         pass
-
 
     def parse_part(self, part):
         ctype = part.get('Content-Type').split('/')
@@ -99,6 +109,7 @@ class Extract():
 
         if 'html' in ctype:
             assert not self.html
+            self.folder = Path(uri).name
             self.raw_html = raw_payload
             self.html = payload
             self.soup = BeautifulSoup(payload, features="html.parser")
@@ -108,13 +119,12 @@ class Extract():
             logging.debug(f'file_name {attrs["name"]}')
 
     def __str__(self):
-        return self.soup.prettify() if self.soup else "Extract<None>"
+        return str(self.soup) if self.soup else "Extract<None>" # .prettify()
 
     def print_text(self):
         print(self.msg.preamble)
         print(self)
         print(self.msg.epilogue)
-
 
 def main():
     args = sys.argv

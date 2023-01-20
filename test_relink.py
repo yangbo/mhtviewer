@@ -4,11 +4,11 @@ from relink import *
 from pathlib import Path
 from pytest import fixture
 
-TEST_FILE='sample.mht'
+TEST_MHT='sample.mht'
 
 @fixture
 def soup():
-	ex = Extract(TEST_FILE)
+	ex = Extract(TEST_MHT)
 	rel = relink(ex, REVIEWER)
 	return rel.soup
 
