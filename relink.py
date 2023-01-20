@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
+import sys
 from extract import Extract
 
 RID="PRComment"
-REVIEWER="User F"
+RID_TOC=f'{RID}_TOC'
 
 def tadd(p,t): 
     p.contents.append(t)
@@ -29,21 +29,25 @@ def relink(ex, reviewer):
         tadd(links, item)
 
     toc = mktg('div')
-    toc['id'] = f'{RID}_TOC'
-    toc.string = "List of {RID}s"
-    body = ex.get('body')
-    body.contents.insert(0, tadd(toc, links))
+    toc['id'] = RID_TOC
+    toc.string = f"List of {RID}s"
+    sibling = ex.get(**{'data-test':"review__header"})
+    assert sibling
+    sibling.insert_after(tadd(toc, links))
     return ex
 
 def main():
     args = sys.argv
-    if len(args) != 2:
-        print("Usage: ./relink.py <mht file>")
+    if len(args) != 3:
+        print("Usage: ./relink.py <mht file> <reviewer>")
         return
     mht = sys.argv[1]
-    log('Extract multi-part of "%s" ...' % mht)
-    parsed = Extract(mht)
-    relink(ex, REVIEWER)
+    reviewer = sys.argv[2]
+    print('Extract multi-part of "%s" ...' % mht)
+    ex = Extract(mht)
+    print('Adding links for "%s" ...' % reviewer)
+    relink(ex, reviewer)
+    ex.save()
 
 if __name__ == '__main__':
     main()

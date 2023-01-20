@@ -16,6 +16,7 @@ flake8 = "^6.0.0"
 
 [tool.poetry.scripts]
 mht-unarchive = "extract:main"
+mht-annotate = "relink:main"
 
 [build-system]
 requires = ["poetry-core"]
