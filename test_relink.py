@@ -35,6 +35,7 @@ def test_div(soup):
 	#print(sib)
 	assert sib['class']
 	assert RID_PARENT in sib['class']
+	assert soup.find(class_=RID_PARENT)
 
 def untest_ex_get(ex):
 	PREFIX="PRComment"
