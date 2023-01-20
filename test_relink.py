@@ -6,7 +6,7 @@ from pathlib import Path
 from pytest import fixture
 
 TEST_MHT='sample.mhtml'
-TEST_ANCHOR='jss5'
+TEST_ANCHOR='jss6'
 
 @fixture
 def soup():
@@ -38,14 +38,9 @@ def test_div(soup):
 	#assert sib['class']
 	#assert RID_PARENT in sib['class']
 
-def untest_ex_get(ex):
-	PREFIX="PRComment"
-	result = ex.get_all('b', string='User F')
+def test_find_anchor(soup):
+	print(soup.body.div.div.prettify())
+	# ONLY works if `sibling.insert_after(tadd(toc, links))`
+	result = soup.findAll('h4')
 	assert result
-	assert len(result) == 41
-	tag = result[0]
-	n = 1
-	tag['id'] = f'{PREFIX}_{n:03}'
-	tag.string = f'{PREFIX} #{n:03}. {tag.string}'
-	assert 'Comment_001' in str(tag)
-	assert 'Comment_001' in str(ex)
+	assert len(result) == 40

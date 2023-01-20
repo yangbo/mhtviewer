@@ -34,7 +34,7 @@ def relink(ex, reviewer):
     toc.string = f"List of {RID}s"
     sibling = ex.get(class_=RID_PARENT)
     assert sibling
-    sibling.insert_before(tadd(toc, links))
+    sibling.insert_after(tadd(toc, links))
     return ex
 
 def main():
