@@ -91,10 +91,10 @@ class Extract():
 
         return root
 
-    def get(self, name=None, **kwargs):
+    def get(self, name=None, attrs={}, **kwargs):
         return self.soup.find(name, **kwargs) if self.soup else None
 
-    def get_all(self, name=None, **kwargs):
+    def get_all(self, name=None, attrs={}, **kwargs):
         return self.soup.find_all(name, **kwargs) if self.soup else None
 
     def update_link(self, uri, file_name):
