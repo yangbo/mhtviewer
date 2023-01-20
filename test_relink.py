@@ -11,7 +11,7 @@ REVIEWER="User F"
 def soup():
 	ex = Extract(TEST_MHT)
 	rel = relink(ex, REVIEWER)
-	return rel.soup
+	return ex.soup
 
 def test_rel(soup):
 	assert soup
@@ -19,7 +19,7 @@ def test_rel(soup):
 def test_toc(soup):
 	print(RID_TOC)
 	toc = soup.find(id=RID_TOC)
-	print(soup.prettify())
+	#print(soup.prettify())
 	assert toc
 	assert 'List' in str(toc)
 	assert RID in toc['id']
@@ -30,10 +30,6 @@ def test_toc(soup):
 	assert anchor
 	assert RID in anchor['href']
 
-def test_class(soup):
-    div = soup.find("div", {"data-test": "pagecontainer"})
-    assert div
-    _class = div['class']
-    assert _class
-    assert "umKTn" in _class
-
+def test_div(soup):
+    cont = soup.find(**{'data-test':"review__header"})
+    assert cont

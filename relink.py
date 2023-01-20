@@ -31,9 +31,9 @@ def relink(ex, reviewer):
     toc = mktg('div')
     toc['id'] = RID_TOC
     toc.string = f"List of {RID}s"
-    sibling = ex.get("div", {"data-test": "review__header"})
+    sibling = ex.get(**{'data-test':"review__header"})
     assert sibling
-    sibling.insert_before(tadd(toc, links))
+    sibling.insert_after(tadd(toc, links))
     return ex
 
 def main():
