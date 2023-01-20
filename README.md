@@ -6,9 +6,12 @@ Rewritten using `email.message_from_file`
 
 ## Usage
 ```
-./extract.py <file.mht>
-
+curl -sSL https://install.python-poetry.org | python3 - # install poetry
+poetry install
+poetry run ./extract.py <file.mht>
+poetry run ./relink.py <mht file> <review_tag>
 ```
+Output is written to a folder with the same name as the original HTML file.
 
 ## Testing
 ```
