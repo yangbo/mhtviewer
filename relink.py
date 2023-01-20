@@ -6,6 +6,7 @@ from extract import Extract
 
 RID="PRComment"
 RID_TOC=f'{RID}_TOC'
+RID_PARENT='caUSsX'
 
 def tadd(p,t): 
     p.contents.append(t)
@@ -33,7 +34,7 @@ def relink(ex, reviewer):
     toc.string = f"List of {RID}s"
     sibling = ex.get(**{'class':"caUSsX"})
     assert sibling
-    sibling.insert_before(tadd(toc, links))
+    #sibling.insert_before(tadd(toc, links))
     return ex
 
 def main():

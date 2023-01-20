@@ -31,8 +31,10 @@ def untest_toc(soup):
 	assert RID in anchor['href']
 
 def test_div(soup):
-    cont = soup.find(_class="caUSsX")
-    assert cont
+	sib = soup.body.div.div.div.div
+	#print(sib)
+	assert sib['class']
+	assert RID_PARENT in sib['class']
 
 def untest_ex_get(ex):
 	PREFIX="PRComment"
