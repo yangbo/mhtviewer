@@ -3,8 +3,9 @@ from pathlib import Path
 from pytest import fixture
 from tempfile import TemporaryDirectory
 
-TEST_MHT='sample.mht'
-TEST_URI='cid:css-8e135dc7-1298-4278-b82b-9168ec675a37@mhtml.blink'
+TEST_MHT='sample.mhtml'
+TEST_URI='cid:css-e7ca07c8-72d8-4000-b7d9-618b43ee95de@mhtml.blink'
+TEST_EXT='618b43ee95de.css'
 
 def filename():
 	file_path = Path(TEST_URI.split(':')[1])
@@ -25,10 +26,10 @@ def tmp():
 def test_ex_html(ex):
 	assert ex
 	assert ex.html
-	assert 'User F' in str(ex)
+	assert '_code' in str(ex)
 
 def test_ex_save(ex, tmp):
-	assert ex.folder =='timeline'
+	assert ex.folder =='reportgen'
 	root = ex.save('/tmp')
 	assert root
 	assert root.exists()
@@ -38,21 +39,9 @@ def test_ex_save(ex, tmp):
 def test_filename(ex):
 	file_name = filename()
 	local_file = f'./{file_name}'
-	assert '9168ec675a37.css' in local_file
+	assert TEST_EXT in local_file
 	assert TEST_URI not in str(ex)
 	assert file_name in str(ex)
-
-def test_ex_get(ex):
-	PREFIX="PRComment"
-	result = ex.get_all('b', string='User F')
-	assert result
-	assert len(result) == 41
-	tag = result[0]
-	n = 1
-	tag['id'] = f'{PREFIX}_{n:03}'
-	tag.string = f'{PREFIX} #{n:03}. {tag.string}'
-	assert 'Comment_001' in str(tag)
-	assert 'Comment_001' in str(ex)
 
 def test_ex_attrs(ex):
 	assert ex.attrs

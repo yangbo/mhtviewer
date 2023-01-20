@@ -134,7 +134,9 @@ def main():
     mht = sys.argv[1]
     log('Extract multi-part of "%s" ...' % mht)
     parsed = Extract(mht)
-    parsed.print_text()
+    folder = parsed.save()
+    log(folder)
+
 
 if __name__ == '__main__':
     main()
