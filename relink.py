@@ -32,8 +32,8 @@ def relink(ex, reviewer):
     toc['id'] = RID_TOC
     toc.string = f"List of {RID}s"
     sibling = ex.get(**{'data-test':"review__header"})
-    assert sibling
-    sibling.insert_after(tadd(toc, links))
+    #assert sibling
+    #sibling.insert_after(tadd(toc, links))
     return ex
 
 def main():

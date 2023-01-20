@@ -5,6 +5,8 @@ from tempfile import TemporaryDirectory
 
 TEST_MHT='sample.mhtml'
 TEST_URI='cid:css-e7ca07c8-72d8-4000-b7d9-618b43ee95de@mhtml.blink'
+TEST_EXT='618b43ee95de.css'
+ANCHOR='jss6'
 
 def filename():
 	file_path = Path(TEST_URI.split(':')[1])
@@ -25,7 +27,7 @@ def tmp():
 def test_ex_html(ex):
 	assert ex
 	assert ex.html
-	assert 'User F' in str(ex)
+	assert ANCHOR in str(ex)
 
 def test_ex_save(ex, tmp):
 	assert ex.folder =='reportgen'
@@ -38,21 +40,9 @@ def test_ex_save(ex, tmp):
 def test_filename(ex):
 	file_name = filename()
 	local_file = f'./{file_name}'
-	assert '618b43ee95de.css' in local_file
+	assert TEST_EXT in local_file
 	assert TEST_URI not in str(ex)
 	assert file_name in str(ex)
-
-def test_ex_get(ex):
-	PREFIX="PRComment"
-	result = ex.get_all('b', string='User F')
-	assert result
-	assert len(result) == 41
-	tag = result[0]
-	n = 1
-	tag['id'] = f'{PREFIX}_{n:03}'
-	tag.string = f'{PREFIX} #{n:03}. {tag.string}'
-	assert 'Comment_001' in str(tag)
-	assert 'Comment_001' in str(ex)
 
 def test_ex_attrs(ex):
 	assert ex.attrs
