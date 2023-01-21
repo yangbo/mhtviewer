@@ -1,147 +1,141 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import logging
-import sys
-import re
 import quopri
-import base64
-import os
+import sys
+from pathlib import Path
+from urllib.parse import urlparse
+
+from email import message_from_file
+from bs4 import BeautifulSoup
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
 def log(msg):
     logging.info(msg)
 
+MAGIC_EXT = 'mhtml.blink'
+DEFAULT_DECODE = 'latin1'
+
+def unquote(quoted):
+    decoded = quopri.decodestring(quoted)
+    content = decoded.decode(DEFAULT_DECODE)
+    return content
+
+def extract_file_ext(file_name):
+    return Path(file_name).suffix.replace('.','')
+
+def extract_filename(file_path, ctype):
+    file_name = file_path.name  # myfile.png
+    ext = extract_file_ext(file_name)
+    if ctype[-1] == 'svg+xml': 
+        ctype.append('svg')
+
+    if ext in ctype: 
+        return file_name 
+
+    split = file_name.split('@')
+    if split[-1] == MAGIC_EXT:
+        return f'{split[-0]}.css'
+
+    return f'{file_name}.{ctype[-1]}'
+
+class Extract():
+    def __init__(self, source_file):
+        with open(source_file, 'r') as f:
+            self.msg = message_from_file(f)
+
+        self.html = None
+        self.attrs = {}
+        self.payloads = {}
+        for part in self.msg.walk():
+            if not part.is_multipart():
+                self.parse_part(part)
+
+    def files(self):
+        return list(self.attrs.keys())
+
+    def replace_filename(self, uri, file_name):
+        local_file = f'./{file_name}'
+        link = self.get(href=uri)
+        if link:
+            link['href'] = local_file
+            return local_file
+        logging.warning(f'replace_filename.not-found.href={uri}')
+
+    def add_file(self, uri, ctype):
+        sections = urlparse(uri)
+        file_path = Path(sections.path)
+        file_name = extract_filename(file_path, ctype)
+        file_ext = extract_file_ext(file_name)
+
+        attrs = {
+            "uri": uri,
+            "uri.sections": sections,
+            "path": file_path,
+            "name": file_name,
+            "ext": file_ext,
+        }
+        self.attrs[file_name] = attrs
+        self.replace_filename(uri, file_name)
+        return attrs
+
+    def save(self, dest='.'):
+        root = Path(dest) / self.folder
+        root.mkdir(exist_ok=True)
+        def write(f, s): (root / f).write_text(s)
+
+        write('index.html', str(self))
+        for file, data in self.payloads.items():
+            write(file, data)
+
+        return root
+
+    def get(self, name=None, attrs={}, **kwargs):
+        return self.soup.find(name, attrs={}, **kwargs) if self.soup else None
+
+    def get_all(self, name=None, attrs={}, **kwargs):
+        return self.soup.find_all(name, attrs={}, **kwargs) if self.soup else None
+
+    def update_link(self, uri, file_name):
+        pass
+
+    def parse_part(self, part):
+        ctype = part.get('Content-Type').split('/')
+        quoted = part.get('Content-Transfer-Encoding') == 'quoted-printable'
+        uri = part.get('Content-Location')
+        raw_payload = part.get_payload()
+        payload = unquote(raw_payload) if quoted else raw_payload
+
+        if 'html' in ctype:
+            assert not self.html
+            self.folder = Path(uri).name
+            self.raw_html = raw_payload
+            self.html = payload
+            self.soup = BeautifulSoup(payload, features="html.parser")
+        else:
+            attrs = self.add_file(uri, ctype)
+            self.payloads[attrs["name"]] = payload
+            logging.debug(f'file_name {attrs["name"]}')
+
+    def __str__(self):
+        return str(self.soup) if self.soup else "Extract<None>" # .prettify()
+
+    def print_text(self):
+        print(self.msg.preamble)
+        print(self)
+        print(self.msg.epilogue)
 
 def main():
     args = sys.argv
     if len(args) != 2:
-        print("Usage: extract.py <mht file>")
+        print("Usage: ./extract.py <mht file>")
         return
     mht = sys.argv[1]
     log('Extract multi-part of "%s" ...' % mht)
-    # open file
-    with open(mht, 'rb') as f:
-        for line in f.readlines():
-            processline(line)
-
-
-# global variables
-
-boundary = ""
-state = 'none'  # none, start-head, head-end
-body = ""
-content_type = ''
-content_encoding = ''
-content_location = ''
-
-
-def processline(line):
-    global state
-    global body
-
-    getboundary(line)
-    sep = '------=%s' % boundary
-    sep_end = '------=%s--' % boundary
-    # print('sep: %s' % sep)
-    line_stripped = line.strip()
-    if line_stripped == sep or line_stripped == sep_end:
-        state = 'start-head'
-        log('status: %s' % state)
-        # to save block
-        save_block()
-        # reset contentXXX and body
-        reset_content()
-        return
-
-    if state == 'start-head':
-        if line.strip() == '':
-            state = 'head-end'
-            return
-        else:
-            read_header(line)
-            return
-
-    if state == 'head-end':
-        body = body + line
-
-
-def save_block():
-    decoded_body = ''
-    if body == '':
-        return
-    else:
-        # decode
-        if content_encoding == 'quoted-printable':
-            decoded_body = quopri.decodestring(body)
-        if content_encoding == 'base64':
-            decoded_body = base64.b64decode(body)
-        log('will save file "%s", encoding=%s' % (content_location, content_encoding))
-        # save to file
-        save_file(decoded_body)
-
-
-def save_file(decoded_body):
-    # empty then return
-    if not content_location:
-        return
-    # remove file://
-    location = re.sub('file://', '', content_location)
-    # remove C: driver path
-    location = re.sub(r'\\?\w:', '', location)
-    dirname, filename = os.path.split(location)
-    subdir = os.path.relpath('./'+dirname)
-
-    # mkdir at reverse second dir
-    try:
-        os.makedirs(subdir)
-    except OSError:
-        pass
-    relative_file_name = os.path.join(subdir, filename)
-    with open(relative_file_name, 'w') as f:
-        log('saved file: %s' % relative_file_name)
-        f.writelines(decoded_body)
-
-
-def reset_content():
-    global body
-    global content_type
-    global content_location
-    global content_encoding
-    body = ''
-    content_type = ''
-    content_encoding = ''
-    content_location = ''
-
-
-def read_header(line):
-    log('readHeader: %s' % line.strip())
-    global content_type
-    global content_location
-    global content_encoding
-    # parse contentType...
-    matcher = re.match('Content-Location:(.*)', line, flags=re.IGNORECASE)
-    if matcher:
-        # extract location
-        content_location = matcher.group(1).strip()
-
-    matcher = re.match('Content-Transfer-Encoding:(.*)', line, flags=re.IGNORECASE)
-    if matcher:
-        # extract encoding
-        content_encoding = matcher.group(1).strip()
-
-    matcher = re.match('Content-Type:(.*)', line, flags=re.IGNORECASE)
-    if matcher:
-        # extract type
-        content_type = matcher.group(1).strip()
-
-
-def getboundary(line):
-    global boundary  # set global variable
-
-    matcher = re.match(r'Content-Type: multipart/related; boundary="----=(.*)"', line)
-    if matcher:
-        boundary = matcher.group(1)
+    parsed = Extract(mht)
+    folder = parsed.save()
+    log(folder)
 
 
 if __name__ == '__main__':
